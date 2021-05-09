@@ -1,0 +1,32 @@
+### Problema vaselor cu apa
+- vase cu apa colorata
+- vas :
+  - capacitate maxima
+  - volum lichid pe care il contine
+  - culoare lichid
+    - exista si vase vide
+- combinatiile de culori (input) sau culoare nedefinita (nu apare in solutie)
+- culoarea nedefinita + alta culoare => culoare nedefinita
+- REGULI MUTARI:
+  - lichidul vas -> alt vas
+  - culoarea rezultata mereu aceeasi indiferent de cantitati
+  - MODURI DE TURNARE vas1-> vas2:
+    - torn pana se goleste vasul1
+    - torn pana se umple vasul2
+    - fara cantitati intermediare
+  - Cost turnare
+    - Litrii turnati * cost culoare lichid
+    - daca culoarea REZULTATA este nedefinitta => L1 * c1 + L2 *c2 (c1+c2 = culoare nedefinita)
+    - daca culoarea TURNATA este nedefinita => c culoare nedefinita = 1
+
+- Input(Fisier):
+  - c1 + c2 == c2 + c1 == c3
+  - cx costx/L
+  - stare_initiala
+  - capacitate_maxima volum_lichid(0) culoare_lichid(lipseste)
+  - stare_finala
+  - volum_lichid culoare_lichid
+
+- Output(Fisier):
+  - Starile intermediare: Din vasul ID_VAS s-au turnat L litri de apa de culoare C in vasul ID_VAS.
+  - ID_VAS: capacitate_maxima volum_lichid_ culoare_lichid

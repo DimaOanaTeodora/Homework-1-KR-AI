@@ -1,22 +1,22 @@
 :ballot_box_with_check:(5%)
-   * Fișierele de input vor fi într-un folder a cărui cale va fi dată în linia de comanda.
-   * În linia de comandă se va da și calea pentru un folder de output în care programul va crea pentru fiecare fișier de input, fișierul sau fișierele cu rezultatele.
-   * Tot în linia de comandă se va da ca parametru și numărul de soluții de calculat (de exemplu, vrem primele NSOL=4 soluții returnate de fiecare algoritm).
-   * Ultimul parametru va fi timpul de timeout.
-   * Se va descrie în documentație forma în care se apelează programul, plus 1-2 exemple de apel.
+   * :ballot_box_with_check: Fișierele de input vor fi într-un folder a cărui cale va fi dată în linia de comanda.
+   * :ballot_box_with_check: În linia de comandă se va da și calea pentru un folder de output în care programul va crea pentru fiecare fișier de input, fișierul sau fișierele cu rezultatele.
+   * :ballot_box_with_check: Tot în linia de comandă se va da ca parametru și numărul de soluții de calculat (de exemplu, vrem primele NSOL=4 soluții returnate de fiecare algoritm).
+   * :ballot_box_with_check: Ultimul parametru va fi timpul de timeout.
+   * :ballot_box_with_check: Se va descrie în documentație forma în care se apelează programul, plus 1-2 exemple de apel.
 
-:x:(5%)
-   * Citirea din fisier
-   * memorarea starii.
-   * Parsarea fișierului de input care respectă formatul cerut în enunț
+:ballot_box_with_check:(5%)
+   * :ballot_box_with_check: Citirea din fisier
+   * :ballot_box_with_check: memorarea starii
+   * :ballot_box_with_check: Parsarea fișierului de input care respectă formatul cerut în enunț
 
 :x:(15%) Functia de generare a succesorilor
 
 :x:(5%) Calcularea costului pentru o mutare
 
-:x:(10%) Testarea ajungerii în starea scop (indicat ar fi printr-o funcție de testare a scopului)
+:ballot_box_with_check:(10%) Testarea ajungerii în starea scop (indicat ar fi printr-o funcție de testare a scopului)
 
-:x:(2%) euristica banala
+:ballot_box_with_check:(2%) euristica banala
 
 :x:(5%+5%) doua euristici admisibile posibile (se va justifica la prezentare si in documentație de ce sunt admisibile)
 
@@ -37,7 +37,7 @@
  4. timpul de găsire a unei soluții (atenție, pentru soluțiile de la a doua încolo timpul se consideră tot de la începutul execuției algoritmului și nu de la ultima soluție)
  5. numărul maxim de noduri existente la un moment dat în memorie
  6. numărul total de noduri calculate (totalul de succesori generati; atenție la DFI și IDA* se adună pentru fiecare iteratie chiar dacă se repetă generarea arborelui, nodurile se vor contoriza de fiecare dată afișându-se totalul pe toate iterațiile
- 7. între două soluții de va scrie un separator, sau soluțiile se vor scrie în fișiere diferite.
+ 7. :ballot_box_with_check: între două soluții se va scrie un separator, sau soluțiile se vor scrie în fișiere diferite.
  * Obținerea soluțiilor se va face cu ajutorul fiecăruia dintre algoritmii studiați:
     * problema se va rula cu algoritmii: UCS, A* (varianta care dă toate drumurile), A* optimizat (cu listele open și closed, care dă doar drumul de cost minim), IDA*.
     * Pentru toate variantele de A* (cel care oferă toate drumurile, cel optimizat pentru o singură soluție, și IDA*) se va rezolva problema cu fiecare dintre euristici. Fiecare din algoritmi va fi rulat cu timeout, si se va opri daca depășește acel timeout (necesar în special pentru fișierul fără soluții unde ajunge să facă tot arborele, sau pentru DF în cazul soluțiilor aflate foarte în dreapta în arborele de parcurgere).
