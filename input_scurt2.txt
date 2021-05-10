@@ -1,0 +1,10 @@
+albastru galben verde
+albastru 5
+galben 3
+verde 3
+stare_initiala
+5 3 albastru
+4 2 galben
+4 0
+stare_finala
+4 verde

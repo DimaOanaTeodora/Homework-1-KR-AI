@@ -1,0 +1,12 @@
+rosu galben portocaliu
+rosu 2
+galben 3
+portocaliu 5
+stare_initiala
+3 2 rosu
+2 1 galben
+4 2 portocaliu
+stare_finala
+2 rosu
+1 galben
+2 portocaliu

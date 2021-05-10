@@ -24,16 +24,16 @@
    * Atenție, euristica neadmisibilă trebuie să depindă de stare (să se calculeze în funcție de valori care descriu starea pentru care e calculată euristica).
 
 :x:(10%) crearea a 4 fisiere de input cu urmatoarele proprietati:
- 1. un fisier de input care nu are solutii
- 2. un fisier de input care da o stare initiala care este si finala (daca acest lucru nu e realizabil pentru problema, aleasa, veti mentiona acest lucru, explicand si motivul).
+ :ballot_box_with_check: 1. un fisier de input care nu are solutii
+ :ballot_box_with_check: 2. un fisier de input care da o stare initiala care este si finala (daca acest lucru NU e realizabil pentru problema, aleasa, veti mentiona acest lucru, explicand si motivul).
  3. un fisier de input care nu blochează pe niciun algoritm și să aibă ca soluții drumuri lungime micuță (ca să fie ușor de urmărit), să zicem de lungime maxim 20.
  4. un fisier de input care să blocheze un algoritm la timeout, dar minim un alt algoritm să dea soluție (de exemplu se blochează DF-ul dacă soluțiile sunt cât mai "în dreapta" în arborele de parcurgere)
  * dintre ultimele doua fisiere, cel putin un fisier sa dea drumul de cost minim pentru euristicile admisibile si un drum care nu e de cost minim pentru cea euristica neadmisibila
 
 :x: (15%) Pentru cele NSOL drumuri(soluții) returnate de fiecare algoritm (unde NSOL e numarul de soluții dat în linia de comandă) se va afișa:
  1. numărul de ordine al fiecărui nod din drum
- 2. lungimea drumului
- 3. costului drumului
+ :ballot_box_with_check: 2. lungimea drumului
+ :ballot_box_with_check: 3. costului drumului
  4. timpul de găsire a unei soluții (atenție, pentru soluțiile de la a doua încolo timpul se consideră tot de la începutul execuției algoritmului și nu de la ultima soluție)
  5. numărul maxim de noduri existente la un moment dat în memorie
  6. numărul total de noduri calculate (totalul de succesori generati; atenție la DFI și IDA* se adună pentru fiecare iteratie chiar dacă se repetă generarea arborelui, nodurile se vor contoriza de fiecare dată afișându-se totalul pe toate iterațiile

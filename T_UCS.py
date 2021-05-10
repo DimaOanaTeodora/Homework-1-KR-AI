@@ -2,14 +2,11 @@ import time
 import copy
 import sys
 class NodParcurgere:
-    gr = None  # trebuie setat sa contina instanta problemei
 
-    def __init__(self, info, parinte, cost=0, h=0, infoDrum=[]):
+    def __init__(self, info, parinte, cost=0, infoDrum=[]):
         self.info = info # lista de forma [[id, capacitate, cantitate, culoare], ..]
         self.parinte = parinte  # parintele din arborele de parcurgere
         self.g = cost
-        self.h = h
-        self.f = self.g + self.h
         self.infoDrum = infoDrum # lista [vasul1, vasul2, culoare, litrii_turnati]
 
     def obtineDrum(self):
@@ -69,8 +66,6 @@ class NodParcurgere:
         else:
             sir += "parinte= None\n"
         sir += "cost= " + str(self.g) + "\n"
-        sir += "h= " + str(self.h) + "\n"
-        sir += "f= " + str(self.f) + "\n"
         sir += "infoDrum= " + str(self.infoDrum) + "\n"
         return sir
 
@@ -100,6 +95,14 @@ class Graph:
                 v = line.split()
                 if len(v) == 3:
                     stare_initiala.append([id, int(v[0]), int(v[1]), v[2]])
+                    # verific daca culoarea data se gaseste printre culorile puse
+                    gasit = False
+                    for (culoare, cost) in cost_culori:
+                        if v[2] == culoare:
+                            gasit = True
+                            break
+                    if gasit == False:
+                        raise Exception
                 elif len(v) == 2:
                     stare_initiala.append([id, int(v[0]), 0, None])
 
@@ -108,6 +111,14 @@ class Graph:
                 line = p3[id]
                 v = line.split()
                 stare_finala.append((int(v[0]), v[1]))
+                # verific daca culoarea data se gaseste printre culorile puse
+                gasit = False
+                for (culoare, cost) in cost_culori:
+                    if v[1] == culoare:
+                        gasit=True
+                        break
+                if gasit == False:
+                    raise Exception
 
             self.start = stare_initiala  # informatia nodului de start
             self.culori = combinatii_culori
@@ -117,35 +128,28 @@ class Graph:
             print("Eroare la parsarea fisierului!")
             sys.exit(0)
 
-
     def testeaza_scop(self, InfonodCurent):
-        # verific daca gasesc toate vasele impreuna cu
-        # culorile si valorile cantitatilor din scop in informatia nodului curent
         ok=0
-        #print("InfoNodCurent:", InfonodCurent)
         for (cantitate, culoare) in self.scopuri:
-            # 2 mov
-            # 4 portocaliu
             for vas in InfonodCurent:
                 if vas[-1]== culoare and vas[-2]==cantitate:
                     ok+=1
                     break
-        #print("ok:", ok)
-        #print(len(self.scopuri))
+
         if ok==len(self.scopuri):
             return True
         return False
 
     def testeaza_nod_de_exapandat(self, infoNod):
         '''
-                2 tipuri de culori:
-                    1.culori rezultate prin combinare
-                    2.culori care merg combinate
-                '''
-        # print("Nodul: ", infoNod)
-        culori_scop = 0
-        culori_de_combinat = 0
-        set_culori_de_combinat = set()
+        2 tipuri de culori:
+            1.culori rezultate prin combinare
+            2.culori care merg combinate
+        '''
+        #print("Nodul: ", infoNod)
+        culori_scop=0
+        culori_de_combinat=0
+        set_culori_de_combinat=set()
         # formez un set cu culorile care se combina
         # evit duplicatele
         for (c1, c2, c3) in self.culori:
@@ -154,64 +158,52 @@ class Graph:
 
         for culoare in set_culori_de_combinat:
             for vas in infoNod:
-                if vas[3] == culoare:
+                if vas[3]==culoare:
                     culori_de_combinat += 1
 
         for (c1, c2, c3) in self.culori:
             for vas in infoNod:
-                culoare = vas[3]
+                culoare =vas[3]
                 if c3 == culoare:
-                    culori_scop += 1
+                    culori_scop +=1
                     break
-        # print("culori de combinat",culori_de_combinat)
-        # print("culori scop", culori_scop)
+        #print("culori de combinat",culori_de_combinat)
+        #print("culori scop", culori_scop)
         if culori_de_combinat == 0 and culori_scop == len(self.culori):
             # nu am nicio culoare rezultata prin combinare
             # dar am toate culorile care merg combinate
             return True
-        elif culori_de_combinat == len(set_culori_de_combinat) and culori_scop == 0:
+        elif culori_de_combinat == len(set_culori_de_combinat) and culori_scop ==0:
             # am toate culorile rezultate prin combinare
             # dar nu am nicio culoare care merge combinata
             return True
-        elif culori_de_combinat != 0 and culori_scop != 0:
+        elif culori_de_combinat !=0 and culori_scop !=0:
             # am din fiecare tip de culoare
             return True
         return False
 
-
-    # functia de generare a succesorilor, facuta la laborator
-    def genereazaSuccesori(self, nodCurent, tip_euristica="euristica banala"):
+    def genereazaSuccesori(self, nodCurent):
         listaSuccesori = []
-        '''
-        print("************************************")
-        print("Nodul curent: ", nodCurent.info)
-        print("************************************")
-        '''
+
         for i in range(len(nodCurent.info)):
             # copieVase o sa reprezinte un aranjament
-            # copieVase[i] = un vas
-            # TODO: ma pot lipsi de copie vase pt ca nu-l modific
-            copieVase = copy.deepcopy(nodCurent.info)
+            # nodCurent.info[i] = un vas
 
             # daca vasul este vid
-            if len(copieVase[i]) == 0:
+            if len(nodCurent.info[i]) == 0:
                 continue
 
             # iterez prin toate vasele diferite de cel curent
             for j in range(len(nodCurent.info)):
 
-
                 if i == j:  # sa nu fie vasul din care torn
                     continue
+
                 infoDrum=[]
-                infoNodNou = copy.deepcopy(copieVase)
-                VAS1 = copy.deepcopy(copieVase[i])
-                VAS2 = copy.deepcopy(copieVase[j])
-                '''
-                print("Nodul pe care lucrez: ", infoNodNou)
-                print("Vasul 1:", VAS1)
-                print("Vasul 2:", VAS2)
-                '''
+                infoNodNou = copy.deepcopy(nodCurent.info)
+                VAS1 = copy.deepcopy(nodCurent.info[i])
+                VAS2 = copy.deepcopy(nodCurent.info[j])
+
                 infoDrum.append(VAS1[0])
                 infoDrum.append(VAS2[0])
 
@@ -222,17 +214,13 @@ class Graph:
                 '''
                 # cat ar mai avea de adaugat pana face capacitatea maxima:
                 # capacitate_VAS2 - lichid_VAS2
-                #(umple VAS2, altfel golesete VAS1)
-                # capacitate_VAS2 - lichid_VAS2  < lichid_VAS1
+                # (umple VAS2, altfel golesete VAS1)
                 # lichid_de_transferat = capacitate_VAS2 - lichid_VAS2
-                # actualizez nodul curent
-                # lichid_VAS2 = VAS2[2]-= lichid_de_transferat
+
                 lichid_de_transferat = VAS2[1] - VAS2[2]
                 costMutare = 0
                 if lichid_de_transferat!=0:
-
                     # -----------------Schimbare culoare + calcul cost mutare--------------------
-                    # calculez pt culoare_VAS1
                     # daca vasul e gol pentru culoare:
                     if VAS2[2]==0:
                         VAS2[3] = VAS1[3]
@@ -245,22 +233,31 @@ class Graph:
                             costMutare += lichid_de_transferat # cost=1
                     else:
                         # setare culoare pentru vas care nu e gol
+                        # verific daca sunt aceleasi culori (ex: rosu +rosu)
                         ok = False
-                        for (c1,c2,c3) in self.culori:
-                            #c1+c2==c2+c1==c3
-                            if (VAS2[3] == c1 and VAS1[3] == c2) or (VAS2[3] == c2 and VAS1[3] == c1):
-                                VAS2[3] = c3
-                                ok = True
-                                break
-                        if ok == True:
+                        if VAS1[3] == VAS2[3] and VAS1[3]!=None:
                             infoDrum.append(VAS1[3])
                             for (culoare, cost) in self.cost:
                                 if culoare == VAS1[3]:
                                     costMutare += lichid_de_transferat * cost
                                     break
+                        else:
+                            for (c1,c2,c3) in self.culori:
+                                #c1+c2==c2+c1==c3
+                                if (VAS2[3] == c1 and VAS1[3] == c2) or (VAS2[3] == c2 and VAS1[3] == c1):
+                                    VAS2[3] = c3
+                                    ok = True
+                                    break
+                            if ok == True:
+                                infoDrum.append(VAS1[3])
+                                for (culoare, cost) in self.cost:
+                                    if culoare == VAS1[3]:
+                                        costMutare += lichid_de_transferat * cost
+                                        break
 
-                        if ok == False:
+                        if ok == False and VAS1[2]>0:
                             # nu este definita combinatia de culori
+
                             # rezultat culoare nedefinita
                             # costul va fi suma
                             cost1=0
@@ -283,11 +280,9 @@ class Graph:
                                 infoDrum.append(VAS1[3])
                                 costMutare+= cost1+ cost2
                             VAS2[3] = None
-
                     # -----------------Sfarsit schimbare culoare--------------------
 
                     #-----------------Schimbare cantitate lichid---------------------
-
                     if lichid_de_transferat <= VAS1[2] :
                         VAS1[2] -= lichid_de_transferat
                         # setez lichidul pentru VAS2
@@ -298,36 +293,17 @@ class Graph:
                         VAS2[2] += VAS1[2]
                         infoDrum.append(VAS1[2])
                         VAS1[2] = 0
-
                     # -----------------sfarsit schimbare cantitate lichid---------------------
-
-
-                #TODO: de intrebat de cazul cu cap=7 l=1 si cap=4 l=2 daca am voie sa transfer
-                #TODO: de vazut daca fiecare nod ar trebui sa retina si expandarea anterioara
                 infoNodNou[j][2] = copy.deepcopy(VAS2[2])
                 infoNodNou[j][3] = copy.deepcopy(VAS2[3])
                 infoNodNou[i][2] = copy.deepcopy(VAS1[2])
                 infoNodNou[i][3] = copy.deepcopy(VAS1[3])
-                # ca sa nu sara inapoi verific daca a mai fost modelul
-                #print("Noul nod nepus: ", infoNodNou)
-                #print("Info DRUM: ", infoDrum)
-
+                #print("Testul:", self.testeaza_nod_de_exapandat(infoNodNou))
                 if (not nodCurent.contineInDrum(infoNodNou)) and self.testeaza_nod_de_exapandat(infoNodNou):
-                    #print("Noul nod: ", infoNodNou)
-                    #print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                    #print("Cost mutare: ",costMutare)
-                    listaSuccesori.append(NodParcurgere(infoNodNou, nodCurent, nodCurent.g + costMutare,
-                                                        self.calculeaza_h(infoNodNou, tip_euristica), infoDrum))
-
+                    # verific daca a mai fost deja pus in drum
+                    # testez daca merita expandat (nodul nu are solutie)
+                    listaSuccesori.append(NodParcurgere(infoNodNou, nodCurent, nodCurent.g + costMutare, infoDrum))
         return listaSuccesori
-
-    # euristica banala
-    def calculeaza_h(self, infoNod, tip_euristica="euristica banala"):
-        if tip_euristica == "euristica banala":
-            if gr.testeaza_scop(infoNod):
-                return 1
-            return 0
-
 
     def __repr__(self):
         sir = ""
@@ -336,65 +312,50 @@ class Graph:
         return sir
 
 
-
-def a_star(gr, nrSolutiiCautate, tip_euristica):
+def uniform_cost(gr, nrSolutiiCautate=1):
     gasitSolutie = False
 
-    # open = coada noduri descoperite care nu au fost expandate
-    # closed= noduri descoperite si expandate
-    open = [NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start, tip_euristica), [])]
-    print("***Starea initiala***\n", open[0])
+    # in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
+    c = [NodParcurgere(gr.start, None, 0, [])]
+    print("***Starea initiala***\n", c[0])
     print("*********************")
+    while len(c) > 0:
+        nodCurent = c.pop(0)
 
-    # face parte din optimizare
-    closed = []  # n-am expandat pe nimeni la momentul asta
-    while len(open) > 0:
-        #print("Coada actuala: ", str(open))
-        #input()
-        nodCurent = open.pop(0)
-        closed.append(nodCurent)  # a fost vizitat
-
-        if gr.testeaza_scop(nodCurent.info):  # daca am ajuns la un nod scop
+        if gr.testeaza_scop(nodCurent.info):  # testez daca nodul curent este nod scop
             print("-------->Solutie<--------")
-            gasitSolutie=True
+            gasitSolutie = True
 
             nodCurent.afisDrum(afisCost=True, afisLung=True)
-            #return #daca vreau sa-mi afiseze doar solutia optima
+            # return #daca vreau sa-mi afiseze doar solutia optima
             print("\n----------------\n")
             nrSolutiiCautate -= 1  # scad nr de solutii
             if nrSolutiiCautate == 0:
                 return
-        lSuccesori = gr.genereazaSuccesori(nodCurent,tip_euristica=tip_euristica)
-        #print("Lista Succesori:", lSuccesori)
+        lSuccesori = gr.genereazaSuccesori(nodCurent)  # generez lista de succesori
 
-
-        for s in lSuccesori:
+        for s in lSuccesori:  # parcurg succesorii
             i = 0
             gasit_loc = False
-            for i in range(len(open)):
-                # diferenta fata de UCS e ca ordonez dupa f
-
-                # ---------------- Optimizare 2------------------------
-                # daca f-urile sunt egale ordonez descrescator dupa g
-                if open[i].f > s.f or (open[i].f == s.f and open[i].g <= s.g):
+            for i in range(len(c)):
+                # ordonez dupa cost coada
+                # daca elementul din coada are costul mai mare decat succesorul
+                if c[i].g > s.g:  # g e costul total de la start pana la nodul curent
                     gasit_loc = True
                     break
-                # -------------------------------------------------------
-                #if open[i].f >= s.f:
-                    #gasit_loc = True
-                    #break
             if gasit_loc:
-                open.insert(i, s)
+                c.insert(i, s)  # inserez pe pozitia i
+                                # (cea pe care imi ramane ordinea)
             else:
-                open.append(s)
+                c.append(s)  # inserez la finalul cozii
     if gasitSolutie == False:
         print("Input fara solutie")
 
-print("#####Solutii obtinute cu A*#####\n")
-gr = Graph("input_scurt.txt")
+print("##### Solutii obtinute cu UCS #####\n")
+gr = Graph("input_scurt2.txt")
 NodParcurgere.gr = gr
 t1=time.time()
-a_star(gr, nrSolutiiCautate=1,tip_euristica="euristica banala")
+uniform_cost(gr, nrSolutiiCautate=4)
 t2=time.time()
 milis=round(1000*(t2-t1))
 print("Timpul scurs: ", milis, "milisecunde")
