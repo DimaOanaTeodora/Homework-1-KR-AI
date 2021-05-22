@@ -2,6 +2,10 @@
 
 Link enunt: [Problema vaselor cu apa](http://irinaciocan.ro/inteligenta_artificiala/exemple-teme-a-star.php)
 
+### Calculare cost mutare:
+- rezultatul este o culoare definita: L * cost_culoare
+- rezultatul este o culoare nedefinita: L(de turnat) * cost_culoare_vas1 + L(aflat in vasul 2) * cost_culoare_vas2
+- combin doua culori nedefinite: L * 1
 ## Citire din linia de comanda
 ```
 python main.py -i path_to_input_folder -o path_to_output_folder -n NSOL -t TIMEOUT
