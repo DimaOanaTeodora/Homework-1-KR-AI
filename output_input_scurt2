@@ -1,0 +1,56 @@
+##### Solutii obtinute cu UCS #####
+
+***Starea initiala***
+ 0: 5 3 albastru
+1: 4 2 galben
+2: 4 0 
+
+*********************
+
+-------->Solutie<--------
+Din vasul 0 s-au turnat 2 litri de apa de culoare albastru in vasul 1.
+0: 5 1 albastru
+1: 4 4 verde
+2: 4 0 
+
+Cost drum: 10
+Lungime drum: 2
+
+Timpul scurs de la inceputul programului:  1 milisecunde
+----------------
+
+-------->Solutie<--------
+Din vasul 1 s-au turnat 2 litri de apa de culoare galben in vasul 0.
+0: 5 5 verde
+1: 4 0 
+2: 4 0 
+
+Din vasul 0 s-au turnat 4 litri de apa de culoare verde in vasul 1.
+0: 5 1 verde
+1: 4 4 verde
+2: 4 0 
+
+Cost drum: 18
+Lungime drum: 3
+
+Timpul scurs de la inceputul programului:  1 milisecunde
+----------------
+
+-------->Solutie<--------
+Din vasul 1 s-au turnat 2 litri de apa de culoare galben in vasul 0.
+0: 5 5 verde
+1: 4 0 
+2: 4 0 
+
+Din vasul 0 s-au turnat 4 litri de apa de culoare verde in vasul 2.
+0: 5 1 verde
+1: 4 0 
+2: 4 4 verde
+
+Cost drum: 18
+Lungime drum: 3
+
+Timpul scurs de la inceputul programului:  2 milisecunde
+----------------
+Numarul maxim de noduri existente la un moment dat in memorie:  3
+Totalul de succesori generati:  5

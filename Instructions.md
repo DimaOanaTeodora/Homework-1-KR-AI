@@ -10,9 +10,9 @@
    * :ballot_box_with_check: memorarea starii
    * :ballot_box_with_check: Parsarea fișierului de input care respectă formatul cerut în enunț
 
-:x:(15%) Functia de generare a succesorilor
+:ballot_box_with_check:(15%) Functia de generare a succesorilor
 
-:x:(5%) Calcularea costului pentru o mutare
+:ballot_box_with_check:(5%) Calcularea costului pentru o mutare
 
 :ballot_box_with_check:(10%) Testarea ajungerii în starea scop (indicat ar fi printr-o funcție de testare a scopului)
 
@@ -34,20 +34,20 @@
  1. numărul de ordine al fiecărui nod din drum
  :ballot_box_with_check: 2. lungimea drumului
  :ballot_box_with_check: 3. costului drumului
- 4. timpul de găsire a unei soluții (atenție, pentru soluțiile de la a doua încolo timpul se consideră tot de la începutul execuției algoritmului și nu de la ultima soluție)
- 5. numărul maxim de noduri existente la un moment dat în memorie
- 6. numărul total de noduri calculate (totalul de succesori generati; atenție la DFI și IDA* se adună pentru fiecare iteratie chiar dacă se repetă generarea arborelui, nodurile se vor contoriza de fiecare dată afișându-se totalul pe toate iterațiile
- 7. :ballot_box_with_check: între două soluții se va scrie un separator, sau soluțiile se vor scrie în fișiere diferite.
+ :ballot_box_with_check: 4. timpul de găsire a unei soluții (atenție, pentru soluțiile de la a doua încolo timpul se consideră tot de la începutul execuției algoritmului și nu de la ultima soluție)
+ :ballot_box_with_check: 5. numărul maxim de noduri existente la un moment dat în memorie
+ :ballot_box_with_check: 6. numărul total de noduri calculate (totalul de succesori generati; atenție la DFI și IDA* se adună pentru fiecare iteratie chiar dacă se repetă generarea arborelui, nodurile se vor contoriza de fiecare dată afișându-se totalul pe toate iterațiile
+ :ballot_box_with_check: 7. între două soluții se va scrie un separator, sau soluțiile se vor scrie în fișiere diferite.
  * Obținerea soluțiilor se va face cu ajutorul fiecăruia dintre algoritmii studiați:
     * problema se va rula cu algoritmii: UCS, A* (varianta care dă toate drumurile), A* optimizat (cu listele open și closed, care dă doar drumul de cost minim), IDA*.
     * Pentru toate variantele de A* (cel care oferă toate drumurile, cel optimizat pentru o singură soluție, și IDA*) se va rezolva problema cu fiecare dintre euristici. Fiecare din algoritmi va fi rulat cu timeout, si se va opri daca depășește acel timeout (necesar în special pentru fișierul fără soluții unde ajunge să facă tot arborele, sau pentru DF în cazul soluțiilor aflate foarte în dreapta în arborele de parcurgere).
 
-:x:(5%) Afisarea in fisierele de output in formatul cerut
+:ballot_box_with_check: (5%) Afisarea in fisierele de output in formatul cerut
 
 :x:(5%) Validări și optimizari. Veți implementa elementele de mai jos care se potrivesc cu varianta de temă alocată vouă:
- 1. găsirea unui mod de reprezentare a stării, cât mai eficient
- 2. verificarea corectitudinii datelor de intrare
- 3. găsirea unor conditii din care sa reiasă că o stare nu are cum sa contina in subarborele de succesori o stare finala deci nu mai merita expandata (nu are cum să se ajungă prin starea respectivă la o stare scop)
+ :ballot_box_with_check: 1. găsirea unui mod de reprezentare a stării, cât mai eficient
+ :ballot_box_with_check: 2. verificarea corectitudinii datelor de intrare
+ :ballot_box_with_check: 3. găsirea unor conditii din care sa reiasă că o stare nu are cum sa contina in subarborele de succesori o stare finala deci nu mai merita expandata (nu are cum să se ajungă prin starea respectivă la o stare scop)
  4. găsirea unui mod de a realiza din starea initială că problema nu are soluții. Validările și optimizările se vor descrie pe scurt în documentație.
 
 :x:(5%) Comentarii pentru clasele și funcțiile adăugate de voi în program (dacă folosiți scheletul de cod dat la laborator, nu e nevoie sa comentați și clasele existente). Comentariile pentru funcții trebuie să respecte un stil consacrat prin care se precizează tipul și rolurile parametrilor, căt și valoarea returnată (de exemplu, reStructured text sau Google python docstrings).
