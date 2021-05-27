@@ -1,13 +1,22 @@
 import time
 import copy
 import sys
+
 class NodParcurgere:
 
     def __init__(self, info, parinte, cost=0, infoDrum=[]):
-        self.info = info # lista de forma [[id, capacitate, cantitate, culoare], ..]
-        self.parinte = parinte  # parintele din arborele de parcurgere
+        """
+        Constructor
+
+        :param info: lista de forma [[id, capacitate, cantitate, culoare], ..]
+        :param parinte: parintele din arborele de parcurgere
+        :param cost:
+        :param infoDrum: lista [vasul1, vasul2, culoare, litrii_turnati]
+        """
+        self.info = info
+        self.parinte = parinte
         self.g = cost
-        self.infoDrum = infoDrum # lista [vasul1, vasul2, culoare, litrii_turnati]
+        self.infoDrum = infoDrum
 
     def obtineDrum(self):
         l = [self]
@@ -17,20 +26,43 @@ class NodParcurgere:
             nod = nod.parinte
         return l
 
-    def afisDrum(self, afisCost=False, afisLung=False):  # returneaza si lungimea drumului
+    def initial_egal_final(self, stare_finala):
+        """
+        Metoda care verifica daca starea finala se gaseste in nodul de start.
+
+        :param stare_finala: configuratia scop
+
+        :return: True/False
+        """
+
+        for (cantitate, culoare) in stare_finala:
+            gasit = False
+            for (i, cap, cant, cul) in self.info: # informatia nodului initial
+                if cant == cantitate and cul == culoare:
+                    gasit = True
+                    break
+            if gasit == False:
+                return False
+        return True
+
+
+    def afisDrum(self, afisCost=False, afisLung=False):
+        """
+        Metoda pentru afisarea drumului in formatul dorit
+
+        :param afisCost: daca se doreste si afisarea costului
+        :param afisLung: daca se doreste si afisarea lungimii (nr de noduri)
+
+        :return: lungimea drumului (nr de noduri)
+        """
         str=""
         l = self.obtineDrum()
-        stareai_nu_coincide_streaf = False
+
         for nod in l:
             infoDrum = nod.infoDrum  # [vasul1, vasul2, culoare, litrii_turnati]
             if nod.parinte is not None and infoDrum!=[]:
                 str += "Din vasul {} s-au turnat {} litri de apa de culoare {} in vasul {}.".format(infoDrum[0], infoDrum[3], infoDrum[2], infoDrum[1]) +"\n"
                 str += nod.__str__()+"\n"
-                stareai_nu_coincide_streaf = True
-
-        if stareai_nu_coincide_streaf == False:
-            str += l[0]
-            str += "Starea initiala coincide cu cea finala!\n"
 
         if afisCost:
             str += "Cost drum: "+ (self.g).__str__() +"\n"
@@ -39,11 +71,17 @@ class NodParcurgere:
         return str
 
     def contineInDrum(self, infoNodNou):
+        """
+        Metoda care verifica daca informatia unui nod se afla in drumul generat pana la ea.
+        Testeaza sa nu existe deja in drum aceeasi configuratie de vase indiferent de capacitatea lor.
+        Sortare dupa cantitate
+
+        :param infoNodNou: informatia nodului de testat
+
+        :return: True/ False
+        """
         nodDrum = self
-        # trebuie sa testez sa nu fi fost aceeasi configuratie
-        # in mai multe vase goale
-        # trebuie sa le ordonez si sa le compar dupa ordonare
-        # le ordonez dupa canitate
+
         infoNou = sorted(infoNodNou, key=lambda t: t[2])
         while nodDrum is not None:
             infoParinte = sorted(nodDrum.info, key=lambda t: t[2])
@@ -59,6 +97,12 @@ class NodParcurgere:
         return False
 
     def __str__(self):
+        """
+        Metoda care stilizeaza afisarea unui nod.
+        La lipsa de lichid dintr-un vas nu se va afisa nicio culoare
+
+        :return: returneaza sirul pentru afisarea unui nod
+        """
         sir=""
         for vas in self.info:
             sir +=str(vas[0])+": "
@@ -72,6 +116,11 @@ class NodParcurgere:
         return sir
 
     def __repr__(self):
+        """
+        Metoda utilizata pentru debugging
+
+        :return: sirul de afisat
+        """
         sir = "info= " +str(self.info)+"\n"
         if self.parinte != None:
             sir+= "parinte= " +str(self.parinte.info)+"\n"
@@ -83,6 +132,16 @@ class NodParcurgere:
 
 class Graph:
     def __init__(self, nume_fisier):
+        """
+        Constructor
+        Citeste datele din fisierul de intrare si initializeaza datele membre
+        self.start: informatia nodului de start [[id_vas, capacitate, cantitate, culoare]..]
+        self.culori: combinatiile de culori [(c1,c2,c3)..]
+        self.cost: costul culorilor {c1:cost1, c2:cost2..}
+        self.scopuri: starea finala [(cantitate, culoare)..]
+
+        :param nume_fisier: numele fisierului de intrare
+        """
 
         try:
             f = open(nume_fisier, "r")
@@ -150,17 +209,19 @@ class Graph:
         return False
 
     def testeaza_nod_de_exapandat(self, infoNod):
-        '''
-        2 tipuri de culori:
-            1.culori rezultate prin combinare
-            2.culori care merg combinate
-        '''
-        #print("Nodul: ", infoNod)
+        """
+        Metoda care testeaza daca un nod are potentialul ca prin expandare sa ajunga la o solutie.
+        Formez un set cu culorile care se combina ca sa evit duplicatele.
+
+        :param infoNod: informatia nodului
+
+        :return: True/False
+        """
+
         culori_scop=0
         culori_de_combinat=0
         set_culori_de_combinat=set()
-        # formez un set cu culorile care se combina
-        # evit duplicatele
+
         for (c1, c2, c3) in self.culori:
             set_culori_de_combinat.add(c1)
             set_culori_de_combinat.add(c2)
@@ -176,8 +237,7 @@ class Graph:
                 if c3 == culoare:
                     culori_scop +=1
                     break
-        #print("culori de combinat",culori_de_combinat)
-        #print("culori scop", culori_scop)
+
         if culori_de_combinat == 0 and culori_scop == len(self.culori):
             # nu am nicio culoare rezultata prin combinare
             # dar am toate culorile care merg combinate
@@ -192,10 +252,19 @@ class Graph:
         return False
 
     def genereazaSuccesori(self, nodCurent):
+        """
+        Metoda care genereaza toti succesorii posibili nodului curent.
+        Fiecare nod generat este verificat daca a mai fost deja generat si
+        daca are potential de a ajunge la o solutie.
+
+        :param nodCurent: nodul caruia i se vor genera succesorii
+
+        :return: lista succesorilor nodului primit ca parametru
+        """
         listaSuccesori = []
 
         for i in range(len(nodCurent.info)):
-            # copieVase o sa reprezinte un aranjament
+            # copieVase o sa reprezinte o configurare
             # nodCurent.info[i] = un vas
 
             # daca vasul este vid
@@ -311,6 +380,11 @@ class Graph:
         return listaSuccesori
 
     def __repr__(self):
+        """
+        Metoda utilitara pentru debugging.
+
+        :return: sir de afisat
+        """
         sir = ""
         for (k, v) in self.__dict__.items():
             sir += "{} = {}\n".format(k, v)
@@ -324,13 +398,23 @@ def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
     print("##### Solutii obtinute cu UCS #####\n")
     print("##### Solutii obtinute cu UCS #####\n", file= output)
 
-    nr_max_noduri_in_memorie = 1 # pt ca plec de la primul nod
-    nr_total_noduri_calculate = 1 # pt ca plec de la primul nod
+
+    nr_max_noduri_in_memorie = 1 # plec de la primul nod
+    nr_total_noduri_calculate = 1 # plec de la primul nod
 
     gasitSolutie = False
 
-    # in coada vom avea doar noduri de tip NodParcurgere (nodurile din arborele de parcurgere)
     c = [NodParcurgere(gr.start, None, 0, [])]
+
+    if c[0].initial_egal_final(gr.scopuri) == True:
+        print("!! Starea initiala coincide cu cea finala !!")
+        print("!! Starea initiala coincide cu cea finala !!", file= output)
+        return
+    if gr.testeaza_nod_de_exapandat(c[0].info) == False:
+        print("!! Problema nu are solutii !!")
+        print("!! Problema nu are solutii !!", file=output)
+        return
+
     print("***Starea initiala***\n", c[0])
     print("***Starea initiala***\n", c[0], file= output)
     print("*********************")
@@ -341,7 +425,7 @@ def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
 
         nodCurent = c.pop(0)
 
-        if gr.testeaza_scop(nodCurent.info):  # testez daca nodul curent este nod scop
+        if gr.testeaza_scop(nodCurent.info):
             t2 = time.time()
 
             print("\n-------->Solutie<--------")
@@ -350,7 +434,7 @@ def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
 
             print(nodCurent.afisDrum(afisCost=True, afisLung=True))
             print(nodCurent.afisDrum(afisCost=True, afisLung=True), file= output)
-            # return #daca vreau sa-mi afiseze doar solutia optima
+
             milis = round(1000 * (t2 - t1))
             print("Timpul scurs de la inceputul programului: ", milis, "milisecunde")
             print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file= output)
@@ -361,7 +445,7 @@ def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
             if nrSolutiiCautate == 0:
                 return
 
-        lSuccesori = gr.genereazaSuccesori(nodCurent)  # generez lista de succesori
+        lSuccesori = gr.genereazaSuccesori(nodCurent)
         nr_total_noduri_calculate += len(lSuccesori)
 
         for s in lSuccesori:  # parcurg succesorii
@@ -381,18 +465,19 @@ def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
 
     if gasitSolutie == False:
         print("Input fara solutie")
+
     print("Numarul maxim de noduri existente la un moment dat in memorie: ", nr_max_noduri_in_memorie)
     print("Numarul maxim de noduri existente la un moment dat in memorie: ", nr_max_noduri_in_memorie, file= output)
     print("Totalul de succesori generati: ", nr_total_noduri_calculate)
     print("Totalul de succesori generati: ", nr_total_noduri_calculate, file= output)
     output.close()
 
-nume_fisier_intrare = "input_scurt2.txt"
+nume_fisier_intrare = "initial_egal_final.txt"
 nume_fisier_iesire = "output_"+ nume_fisier_intrare.split(".")[0]
-gr = Graph(nume_fisier_intrare)
-NodParcurgere.gr = gr
 
-uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=4)
+gr = Graph(nume_fisier_intrare)
+
+uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=2)
 
 
 
