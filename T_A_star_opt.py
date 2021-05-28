@@ -4,6 +4,7 @@ import sys
 import argparse
 import os
 
+
 class NodParcurgere:
     gr = None
 
@@ -597,30 +598,31 @@ class Graph:
         for (k, v) in self.__dict__.items():
             sir += "{} = {}\n".format(k, v)
         return sir
+
 def afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate ):
     print("Numarul maxim de noduri existente la un moment dat in memorie: ", nr_max_noduri_in_memorie, file=gr.output)
     print("Totalul de succesori generati: ", nr_total_noduri_calculate, file=gr.output)
 
+def a_star_optimizat(gr, tip_euristica):
 
-def ida_star(gr, nrSolutiiCautate, tip_euristica="euristica banala"):
+    print("##### Solutii obtinute cu A* optimizat #####\n", file=gr.output)
 
-    print("##### Solutii obtinute cu IDA* #####\n", file=gr.output)
-
-    global nr_max_noduri_in_memorie
     nr_max_noduri_in_memorie = 1  # plec de la primul nod
-    global nr_total_noduri_calculate
     nr_total_noduri_calculate = 1  # plec de la primul nod
 
+    gasitSolutie = False
+
+    # Open = coada noduri descoperite care nu au fost expandate
+    # closed = noduri descoperite si expandate
+    Open = [NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start, tip_euristica), [])]
 
 
-    nodStart = NodParcurgere(gr.start, None, 0, gr.calculeaza_h(gr.start, tip_euristica), [])
-    limita = nodStart.f
+    print("***Starea initiala***\n", Open[0], file=gr.output)
 
-
-    print("***Starea initiala***\n", nodStart, file=gr.output)
     print("*********************", file=gr.output)
 
-    if nodStart.initial_egal_final(gr.scopuri) == True:
+    if Open[0].initial_egal_final(gr.scopuri) == True:
+
         print("!! Starea initiala coincide cu cea finala !!\n", file=gr.output)
         t2 = time.time()
         milis = round(1000 * (t2 - gr.t1))
@@ -628,70 +630,101 @@ def ida_star(gr, nrSolutiiCautate, tip_euristica="euristica banala"):
         afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
         return
 
+    if gr.testeaza_nod_de_exapandat(Open[0].info) == False:
+        print("!! Input fara solutie !!\n", file=gr.output)
+        t2 = time.time()
+        milis = round(1000 * (t2 - gr.t1))
+        print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=gr.output)
+        afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
+        return
 
-    while True:
+    closed = []  # n-am expandat niciun nod pana acum
 
-        nrSolutiiCautate, rez = construieste_drum(gr, nodStart, limita, nrSolutiiCautate, tip_euristica )
+    while len(Open) > 0:
+        gr.depasire_timeout()
 
-        if rez == "gata":
-            break
+        if nr_max_noduri_in_memorie < len(Open):
+            nr_max_noduri_in_memorie = len(Open)
 
-        if rez == float('inf'):
-            # nu am avut nicio solutie generata
-            print("!! Input fara solutie !!\n", file=gr.output)
+        nodCurent = Open.pop(0)
+        closed.append(nodCurent)  # a fost vizitat
+
+        if gr.testeaza_scop(nodCurent.info):
+            print("\n-------->Solutie<--------", file=gr.output)
+            gasitSolutie = True
+
+            print(nodCurent.afisDrum(afisCost=True, afisLung=True), file=gr.output)
+
+            gr.depasire_timeout()
+
             t2 = time.time()
             milis = round(1000 * (t2 - gr.t1))
             print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=gr.output)
+
             afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
-            break
-        limita = rez
+            return # solutia optima (prima)
+
+
+        lSuccesori = gr.genereazaSuccesori(nodCurent, tip_euristica=tip_euristica)
+        nr_total_noduri_calculate += len(lSuccesori)
+
+        gr.depasire_timeout()
+
+        # -----------------------optimizare--------------------------
+        # solutia neoptimizata pune foarte multe noduri in Open uneori si dubluri
+        # deci, elimin nodurile de cost mare care urmau sa fie expandate
+
+        for s in lSuccesori:
+            gasitOpen = False
+            for elemc in Open:
+                if s.info == elemc.info:
+                    # inseamna ca este in Open si nu mai are rost sa-l caute in close
+                    gasitOpen = True
+
+                    if s.f >= elemc.f:  # nu mai vreau sa-l expandez
+                        if s in lSuccesori:
+                            lSuccesori.remove(s)
+                    else:
+                        if elemc in Open:
+                            Open.remove(elemc)  # il sterg doar din coada
+            if not gasitOpen:
+                for elemc in closed:
+                    if s.info == elemc.info:
+                        if s.f >= elemc.f:  # nu mai vreau sa adaug succesorul
+                            if s in lSuccesori:
+                                lSuccesori.remove(s)
+                        else:
+                            if elemc in Open:
+                                Open.remove(elemc)  # il sterg din coada
+        # -----------------------Sfarsit optimizare-----------------------------
+
+        for s in lSuccesori:
+            i = 0
+            gasit_loc = False
+            for i in range(len(Open)):
+                # ---------------- Optimizare 2------------------------
+                # daca f-urile sunt egale ordonez descrescator dupa g
+                if Open[i].f > s.f or (Open[i].f == s.f and Open[i].g <= s.g):
+                    gasit_loc = True
+                    break
+                # -------------------------------------------------------
+            if gasit_loc:
+                Open.insert(i, s)
+            else:
+                Open.append(s)
 
     gr.depasire_timeout()
+
+    if gasitSolutie == False:
+        print("!! Input fara solutie !!\n", file=gr.output)
+        t2 = time.time()
+        milis = round(1000 * (t2 - gr.t1))
+        print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=gr.output)
+        afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
 
     # inchid fisierul de iesire
     gr.output.close()
 
-def construieste_drum(gr, nodCurent, limita, nrSolutiiCautate, tip_euristica):
-    global nr_total_noduri_calculate, nr_max_noduri_in_memorie, gasitSolutie
-
-    if nodCurent.f > limita:
-        return nrSolutiiCautate, nodCurent.f
-
-    if gr.testeaza_scop(nodCurent.info) and nodCurent.f == limita:
-
-        print("\n-------->Solutie<--------", file=gr.output)
-
-        print(nodCurent.afisDrum(afisCost=True, afisLung=True), file=gr.output)
-
-        gr.depasire_timeout()
-
-        t2 = time.time()
-        milis = round(1000 * (t2 - gr.t1))
-        print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=gr.output)
-
-        afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
-        print("---------------------", file=gr.output)
-
-        nrSolutiiCautate -= 1
-        if nrSolutiiCautate == 0:
-            return 0 , "gata"
-
-    lSuccesori = gr.genereazaSuccesori(nodCurent, tip_euristica)
-    nr_total_noduri_calculate += len(lSuccesori)
-    if nr_max_noduri_in_memorie < len(lSuccesori):
-        nr_max_noduri_in_memorie = len(lSuccesori)
-
-    minim = float('inf')
-
-    gr.depasire_timeout()
-
-    for s in lSuccesori:
-        nrSolutiiCautate, rez = construieste_drum(gr, s, limita, nrSolutiiCautate, tip_euristica)
-        if rez == "gata":
-            return 0, "gata"
-        if rez < minim:
-            minim = rez
-    return nrSolutiiCautate, minim
 
 def citire_linie_de_comanda():
 
@@ -737,7 +770,9 @@ def citire_linie_de_comanda():
         # ----prelucrare fisier de input ---------#
         gr = Graph(nume_intreg, cale_folder_ouput, nume_fisier_iesire, timeout)
         NodParcurgere.gr = gr
-        ida_star(gr,  nrSolutiiCautate=NSOL, tip_euristica="euristica admisibila 2")
+        a_star_optimizat(gr,  tip_euristica="euristica admisibila 2")
 
 
 citire_linie_de_comanda()
+
+

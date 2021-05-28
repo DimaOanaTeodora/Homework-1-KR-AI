@@ -1,8 +1,11 @@
 import time
 import copy
 import sys
+import argparse
+import os
 
 class NodParcurgere:
+    gr = None
 
     def __init__(self, info, parinte, cost=0, infoDrum=[]):
         """
@@ -10,15 +13,21 @@ class NodParcurgere:
 
         :param info: lista de forma [[id, capacitate, cantitate, culoare], ..]
         :param parinte: parintele din arborele de parcurgere
-        :param cost:
+        :param cost: costul drumului pana la nodul curent
         :param infoDrum: lista [vasul1, vasul2, culoare, litrii_turnati]
         """
+        # testez timpul de timeout
+        gr.depasire_timeout()
+
         self.info = info
         self.parinte = parinte
         self.g = cost
         self.infoDrum = infoDrum
 
     def obtineDrum(self):
+        # testez timpul de timeout
+        gr.depasire_timeout()
+
         l = [self]
         nod = self
         while nod.parinte is not None:
@@ -34,6 +43,8 @@ class NodParcurgere:
 
         :return: True/False
         """
+        # testez timpul de timeout
+        gr.depasire_timeout()
 
         for (cantitate, culoare) in stare_finala:
             gasit = False
@@ -45,7 +56,6 @@ class NodParcurgere:
                 return False
         return True
 
-
     def afisDrum(self, afisCost=False, afisLung=False):
         """
         Metoda pentru afisarea drumului in formatul dorit
@@ -55,6 +65,9 @@ class NodParcurgere:
 
         :return: lungimea drumului (nr de noduri)
         """
+        # testez timpul de timeout
+        gr.depasire_timeout()
+
         str=""
         l = self.obtineDrum()
 
@@ -80,6 +93,9 @@ class NodParcurgere:
 
         :return: True/ False
         """
+        # testez timpul de timeout
+        gr.depasire_timeout()
+
         nodDrum = self
 
         infoNou = sorted(infoNodNou, key=lambda t: t[2])
@@ -103,6 +119,9 @@ class NodParcurgere:
 
         :return: returneaza sirul pentru afisarea unui nod
         """
+        # testez timpul de timeout
+        gr.depasire_timeout()
+
         sir=""
         for vas in self.info:
             sir +=str(vas[0])+": "
@@ -121,6 +140,9 @@ class NodParcurgere:
 
         :return: sirul de afisat
         """
+        # testez timpul de timeout
+        gr.depasire_timeout()
+
         sir = "info= " +str(self.info)+"\n"
         if self.parinte != None:
             sir+= "parinte= " +str(self.parinte.info)+"\n"
@@ -131,7 +153,7 @@ class NodParcurgere:
         return sir
 
 class Graph:
-    def __init__(self, nume_fisier):
+    def __init__(self, nume_fisier_intrare, cale_folder_ouput, nume_fisier_iesire, timeout ):
         """
         Constructor
         Citeste datele din fisierul de intrare si initializeaza datele membre
@@ -139,14 +161,26 @@ class Graph:
         self.culori: combinatiile de culori [(c1,c2,c3)..]
         self.cost: costul culorilor {c1:cost1, c2:cost2..}
         self.scopuri: starea finala [(cantitate, culoare)..]
+        self.t1: timpul de incepere al programului
+        self.output: fisierul de output
+        self.timeout: timpul de timeout
 
-        :param nume_fisier: numele fisierului de intrare
+        :param nume_fisier_intrare: calea + numele fisierului de intrare
+        :param cale_folder_ouput: cale folder output
+        :param nume_fisier_iesire: numele fisierului de iesire
         """
 
+        self.timeout = timeout
+        self.t1 = time.time()
+        self.output = open(cale_folder_ouput + "\\" + nume_fisier_iesire, "w")
+
+        # testez timpul de timeout
+        self.depasire_timeout()
+
         try:
-            f = open(nume_fisier, "r")
+            f = open(nume_fisier_intrare, "r")
         except:
-            print("Eroare la deschiderea fisierului!")
+            print("Eroare la deschiderea fisierului!", file=self.output)
             sys.exit(0)
 
         try:
@@ -193,10 +227,27 @@ class Graph:
             self.cost = cost_culori
             self.scopuri = stare_finala
         except:
-            print("Eroare la parsarea fisierului!")
+            print("Eroare la parsarea fisierului!", file=self.output)
+            sys.exit(0)
+
+    def depasire_timeout(self):
+        """
+        Metoda care verifica daca a fost depasit timpul de timeout
+        :param t1: timpul de la inceperea executarii programului
+        :param timeout: timpul de timeout
+
+        :return: True/False
+        """
+        t2 = time.time()
+        milis = round(1000 * (t2 - self.t1))
+        if milis > self.timeout:
+            print("Solutia a depasit timpul dat", file=self.output)
             sys.exit(0)
 
     def testeaza_scop(self, InfonodCurent):
+        # testez timpul de timeout
+        self.depasire_timeout()
+
         ok=0
         for (cantitate, culoare) in self.scopuri:
             for vas in InfonodCurent:
@@ -217,6 +268,8 @@ class Graph:
 
         :return: True/False
         """
+        # testez timpul de timeout
+        self.depasire_timeout()
 
         culori_scop=0
         culori_de_combinat=0
@@ -237,13 +290,22 @@ class Graph:
                 if c3 == culoare:
                     culori_scop +=1
                     break
+        # verific sa nu am cantitatea data mai mare ca si capacitatea data
+        for (cantitate, culoare) in self.scopuri:
+            nr=0
+            for (id, cap, cant, cul) in infoNod:
+                if cantitate > cap:
+                    nr+=1
+            if nr==len(infoNod):
+                return False
 
+        # verificari referitoare la culori
         if culori_de_combinat == 0 and culori_scop == len(self.culori):
             # nu am nicio culoare rezultata prin combinare
             # dar am toate culorile care merg combinate
             return True
-        elif culori_de_combinat == len(set_culori_de_combinat) and culori_scop ==0:
-            # am toate culorile rezultate prin combinare
+        elif culori_de_combinat >=2 and culori_scop ==0:
+            # presupun ca am minim 2 culori din care pot sa obtin o noua culoare prin combinare
             # dar nu am nicio culoare care merge combinata
             return True
         elif culori_de_combinat !=0 and culori_scop !=0:
@@ -264,6 +326,9 @@ class Graph:
         listaSuccesori = []
 
         for i in range(len(nodCurent.info)):
+            # testez timpul de timeout
+            self.depasire_timeout()
+
             # copieVase o sa reprezinte o configurare
             # nodCurent.info[i] = un vas
 
@@ -385,18 +450,21 @@ class Graph:
 
         :return: sir de afisat
         """
+        # testez timpul de timeout
+        self.depasire_timeout()
+
         sir = ""
         for (k, v) in self.__dict__.items():
             sir += "{} = {}\n".format(k, v)
         return sir
 
+def afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate ):
+    print("Numarul maxim de noduri existente la un moment dat in memorie: ", nr_max_noduri_in_memorie, file=gr.output)
+    print("Totalul de succesori generati: ", nr_total_noduri_calculate, file=gr.output)
 
-def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
-    t1 = time.time()
+def uniform_cost(gr, nrSolutiiCautate=1):
 
-    output = open(nume_fisier_iesire, 'w')
-    print("##### Solutii obtinute cu UCS #####\n")
-    print("##### Solutii obtinute cu UCS #####\n", file= output)
+    print("##### Solutii obtinute cu UCS #####\n", file= gr.output)
 
 
     nr_max_noduri_in_memorie = 1 # plec de la primul nod
@@ -406,47 +474,60 @@ def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
 
     c = [NodParcurgere(gr.start, None, 0, [])]
 
+
+    print("***Starea initiala***\n", c[0], file= gr.output)
+
+    print("*********************", file= gr.output)
+
+
     if c[0].initial_egal_final(gr.scopuri) == True:
-        print("!! Starea initiala coincide cu cea finala !!")
-        print("!! Starea initiala coincide cu cea finala !!", file= output)
-        return
-    if gr.testeaza_nod_de_exapandat(c[0].info) == False:
-        print("!! Problema nu are solutii !!")
-        print("!! Problema nu are solutii !!", file=output)
+        print("!! Starea initiala coincide cu cea finala !!\n", file=gr.output)
+        t2 = time.time()
+        milis = round(1000 * (t2 - gr.t1))
+        print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=gr.output)
+        afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
         return
 
-    print("***Starea initiala***\n", c[0])
-    print("***Starea initiala***\n", c[0], file= output)
-    print("*********************")
-    print("*********************", file= output)
+    if gr.testeaza_nod_de_exapandat(c[0].info) == False:
+        print("!! Input fara solutie !!\n", file=gr.output)
+        t2 = time.time()
+        milis = round(1000 * (t2 - gr.t1))
+        print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=gr.output)
+        afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
+        return
+
     while len(c) > 0:
+        gr.depasire_timeout()
+
         if nr_max_noduri_in_memorie < len(c):
             nr_max_noduri_in_memorie = len(c)
 
         nodCurent = c.pop(0)
 
         if gr.testeaza_scop(nodCurent.info):
-            t2 = time.time()
 
-            print("\n-------->Solutie<--------")
-            print("\n-------->Solutie<--------", file= output)
+            print("\n-------->Solutie<--------", file= gr.output)
             gasitSolutie = True
 
-            print(nodCurent.afisDrum(afisCost=True, afisLung=True))
-            print(nodCurent.afisDrum(afisCost=True, afisLung=True), file= output)
+            print(nodCurent.afisDrum(afisCost=True, afisLung=True), file= gr.output)
 
-            milis = round(1000 * (t2 - t1))
-            print("Timpul scurs de la inceputul programului: ", milis, "milisecunde")
-            print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file= output)
+            gr.depasire_timeout()
 
-            print("----------------")
-            print("----------------", file= output)
-            nrSolutiiCautate -= 1  # scad nr de solutii
+            t2 = time.time()
+            milis = round(1000 * (t2 - gr.t1))
+            print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=  gr.output)
+            afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
+
+            print("----------------", file=  gr.output)
+
+            nrSolutiiCautate -= 1
             if nrSolutiiCautate == 0:
                 return
 
         lSuccesori = gr.genereazaSuccesori(nodCurent)
         nr_total_noduri_calculate += len(lSuccesori)
+
+        gr.depasire_timeout()
 
         for s in lSuccesori:  # parcurg succesorii
             i = 0
@@ -463,22 +544,71 @@ def uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=1):
             else:
                 c.append(s)  # inserez la finalul cozii
 
+    gr.depasire_timeout()
+
     if gasitSolutie == False:
-        print("Input fara solutie")
+        print("!! Input fara solutie !!\n", file= gr.output)
+        t2 = time.time()
+        milis = round(1000 * (t2 - gr.t1))
+        print("Timpul scurs de la inceputul programului: ", milis, "milisecunde", file=gr.output)
+        afis_suplimentar(nr_max_noduri_in_memorie, nr_total_noduri_calculate)
 
-    print("Numarul maxim de noduri existente la un moment dat in memorie: ", nr_max_noduri_in_memorie)
-    print("Numarul maxim de noduri existente la un moment dat in memorie: ", nr_max_noduri_in_memorie, file= output)
-    print("Totalul de succesori generati: ", nr_total_noduri_calculate)
-    print("Totalul de succesori generati: ", nr_total_noduri_calculate, file= output)
-    output.close()
+    elif nrSolutiiCautate > 0 : # daca nrSolutiiCautate > nrSolutiiGasite
+        print("Nu mai sunt alte solutii :( ", file=gr.output)
+        print("----------------\n", file=gr.output)
 
-nume_fisier_intrare = "initial_egal_final.txt"
-nume_fisier_iesire = "output_"+ nume_fisier_intrare.split(".")[0]
 
-gr = Graph(nume_fisier_intrare)
+    # inchid fisierul de iesire
+    gr.output.close()
 
-uniform_cost(gr, nume_fisier_iesire , nrSolutiiCautate=2)
+def citire_linie_de_comanda():
 
+    """
+     1. calea catre folderul cu fisiere de input
+     2. calea pentru folderul de output
+     3. NSOL
+     4. Timpul de timeout
+
+    Obtin o lista cu numele fișierelor de input.
+    Creez fisiere de output pentru fiecare fisier de input.
+
+    """
+    global gr
+
+    # ---------Citirea cu argumente-------
+    ap = argparse.ArgumentParser()
+    # required=True => argumente obligatorii
+    ap.add_argument("-i", "--i", required=True, help="cale folder cu fisiere de input")
+    ap.add_argument("-o", "--o", required=True, help="cale folder cu fisiere de output")
+    ap.add_argument("-n", "--n", required=True, help="nurmarul de solutii dorite")
+    ap.add_argument("-t", "--t", required=True, help="valoarea de timeout in milisecunde")
+
+    argumente = vars(ap.parse_args())
+    cale_folder_input = argumente['i']
+    cale_folder_ouput = argumente['o']
+    NSOL = int(argumente['n'])
+    timeout = int(argumente['t'])
+
+    # ---------Sfarsit citire argumente-----------
+
+    listaFisiereIntrare = os.listdir(cale_folder_input)
+
+
+    # verific daca nu există folderul folder_output, caz în care îl creez
+    if not os.path.exists(cale_folder_ouput):
+        os.mkdir(cale_folder_ouput)
+
+    for nume_fisier_intrare in listaFisiereIntrare:
+        nume_intreg = cale_folder_input + "\\" + nume_fisier_intrare
+        nume_fisier_iesire = "output_" + nume_fisier_intrare.split(".")[0]
+
+        # ----prelucrare fisier de input ---------#
+        gr = Graph(nume_intreg, cale_folder_ouput, nume_fisier_iesire, timeout)
+        NodParcurgere.gr = gr
+        uniform_cost(gr, nrSolutiiCautate=NSOL)
+
+
+citire_linie_de_comanda()
 
 
 
