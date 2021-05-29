@@ -452,6 +452,9 @@ class Graph:
                     # verific daca a mai fost deja pus in drum
                     # testez daca merita expandat (nodul nu are solutie)
                     listaSuccesori.append(NodParcurgere(infoNodNou, nodCurent, nodCurent.g + costMutare, self.calculeaza_h(infoNodNou, tip_euristica), infoDrum))
+                    if self.calculeaza_h(infoNodNou, tip_euristica) >  nodCurent.g + costMutare :
+                        print("Euristica: ", self.calculeaza_h(infoNodNou, tip_euristica))
+                        print("Costul real", nodCurent.g + costMutare)
         return listaSuccesori
 
     def calculeaza_h(self, infoNod, tip_euristica="euristica banala"):
@@ -496,8 +499,6 @@ class Graph:
                 euristici.append(h)
             # testez timpul de timeout
             self.depasire_timeout()
-            # (min(euristici))
-
             return min(euristici)
 
 
@@ -543,6 +544,10 @@ class Graph:
             return min(euristici)
 
         elif tip_euristica == "neadmisibila":
+            '''
+            presupun ca trebuie sa mut cel putin 3 litrii
+            de apa colorata ca sa ajung la solutia finala
+            '''
             euristici = []
             for (cantitae_scop, culoare_scop) in self.scopuri:
                 gasit = False
@@ -552,31 +557,20 @@ class Graph:
                         gasit = True
                         break
                 if gasit == False:
-                    #  trebuie sa vad din cate mutari obtin culorile din starea finala
+                    # minimul dintre costurile pentru 1L pentru obtinere
                     for (c1, c2, c3) in self.culori:
                         if c3 == culoare_scop:
                             cost_c1 = self.cost.get(c3)
                             cost_c2 = self.cost.get(c3)
-                            nr_c1 = 0
-                            nr_c2 = 0
-                            for (id, capacitate, cantitate, culoare_vas) in infoNod:
-                                if c1 == culoare_vas:
-                                    nr_c1 += 1
-                                if c2 == culoare_vas:
-                                    nr_c2 += 1
-                            # calculez minimul dintre costuri
-                            cost_c1 = cost_c1 * nr_c1
-                            cost_c2 = cost_c2 * nr_c2
-                            if cost_c1 < cost_c2:
-                                h = cost_c2
+                            if cost_c1 > cost_c2:
+                                h = cost_c2*3
                             else:
-                                h = cost_c1
+                                h = cost_c1*3
                 euristici.append(h)
             # print (max(euristici))
             # testez timpul de timeout
             self.depasire_timeout()
-
-            return max(euristici)
+            return min(euristici)
         '''
         de numarat prin cate vase sa mai trec ca sa ajung la culori
         la cea neadmisibila orice peste costul drumului
@@ -740,7 +734,7 @@ def citire_linie_de_comanda():
         # ----prelucrare fisier de input ---------#
         gr = Graph(nume_intreg, cale_folder_ouput, nume_fisier_iesire, timeout)
         NodParcurgere.gr = gr
-        a_star(gr, nrSolutiiCautate=NSOL, tip_euristica="euristica admisibila 2")
+        a_star(gr, nrSolutiiCautate=NSOL, tip_euristica="neadmisibila")
 
 
 citire_linie_de_comanda()
