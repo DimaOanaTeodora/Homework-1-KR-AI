@@ -25,9 +25,13 @@
 
 :ballot_box_with_check: (10%) crearea a 4 fisiere de input cu urmatoarele proprietati:
  :ballot_box_with_check: 1. un fisier de input care nu are solutii
+ 
  :ballot_box_with_check: 2. un fisier de input care da o stare initiala care este si finala (daca acest lucru NU e realizabil pentru problema, aleasa, veti mentiona acest lucru, explicand si motivul).
+ 
  :ballot_box_with_check: 3. un fisier de input care nu blochează pe niciun algoritm și să aibă ca soluții drumuri lungime micuță (ca să fie ușor de urmărit), să zicem de lungime maxim 20.
+ 
  :ballot_box_with_check: 4. un fisier de input care să blocheze un algoritm la timeout, dar minim un alt algoritm să dea soluție
+ 
  * dintre ultimele doua fisiere, cel putin un fisier sa dea drumul de cost minim pentru euristicile admisibile si un drum care nu e de cost minim pentru cea euristica neadmisibila
 
 :ballot_box_with_check: (15%) Pentru cele NSOL drumuri(soluții) returnate de fiecare algoritm se va afișa:
