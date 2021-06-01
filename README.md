@@ -196,15 +196,20 @@ Drumul de cost minim este 25, iar euristica neadimisibila pe A * optimizat va in
 
 ### Comparatii
 
-![Analiza input scurt](http://url/to/img.png)
-![Analiza input lung](http://url/to/img.png)
+![Analiza input scurt](https://github.com/DimaOanaTeodora/Homework-1-KR-AI/blob/main/Analiza_input_scurt.JPG)
+![Analiza input lung](https://github.com/DimaOanaTeodora/Homework-1-KR-AI/blob/main/Analiza_input_lung.JPG)
 
 #### Concluzii pe baza analizei:
 
-- Euristica neadmisibila poate duce la solutii care nu sunt optime
-- Pe primul exemplu, UCS este de 6 ori mai lent decat A*
-- Cea mai buna performanta obtinuta pe ambele teste este A* open/closed si cu euristica admisibila 1.
+- Euristica neadmisibila poate duce la solutii care nu sunt optime (prima solutie generata nu mai este drumul de cost minim)*
+- Cea mai buna performanta obtinuta pe ambele teste este A* optimizat si cu euristica admisibila 1.
 - Euristicile influenteaza foarte mult viteza algoritmilor.
+- Algoritmul care are solutii pentru ambele fisiere este A* optimizat
+- Datorita optimizarilor euristica neadmisibila este mai rapida, insa nu ofera o solutie optima
+- Diferentele clare dintre algortimi se observa pe inputul care genreaza un arbore de succesori mai mare
+- IDA* nu este atat de eficient (se observa ca depaseste timpul de timeout pe inputul mai lung, iar pe cel scurt are timp de executie de 2 ori mai mari ca A* si A* optimizat)
+- A* optimizat este mai eficient din punct de vedere al memoriei utilizate
+- UCS este mai eficient ca IDA*
 
 
 ### Calculare cost mutare:
