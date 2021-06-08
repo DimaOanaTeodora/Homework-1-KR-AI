@@ -6,7 +6,7 @@ import os
 
 
 class NodParcurgere:
-    gr = None
+    gr = None # ma ajuta la testarea timpului de timeout
 
     def __init__(self, info, parinte, cost=0, h=0, infoDrum=[]):
         """
@@ -149,9 +149,6 @@ class NodParcurgere:
 
         :return: sirul de afisat
         """
-        # testez timpul de timeout
-        gr.depasire_timeout()
-
         sir = "info= " + str(self.info) + "\n"
         if self.parinte != None:
             sir += "parinte= " + str(self.parinte.info) + "\n"
@@ -169,6 +166,7 @@ class Graph:
         """
         Constructor
         Citeste datele din fisierul de intrare si initializeaza datele membre
+
         self.start: informatia nodului de start [[id_vas, capacitate, cantitate, culoare]..]
         self.culori: combinatiile de culori [(c1,c2,c3)..]
         self.cost: costul culorilor {c1:cost1, c2:cost2..}
@@ -180,6 +178,7 @@ class Graph:
         :param nume_fisier_intrare: calea + numele fisierului de intrare
         :param cale_folder_ouput: cale folder output
         :param nume_fisier_iesire: numele fisierului de iesire
+        :param timeout: timpul de timeout pentru verificare constanta
         """
         self.timeout = timeout
         self.t1 = time.time()
@@ -243,11 +242,8 @@ class Graph:
 
     def depasire_timeout(self):
         """
-        Metoda care verifica daca a fost depasit timpul de timeout
-        :param t1: timpul de la inceperea executarii programului
-        :param timeout: timpul de timeout
-
-        :return: True/False
+        Metoda care verifica daca a fost depasit timpul de timeout.
+        In caz afirmativ, opreste programul definitiv.
         """
         t2 = time.time()
         milis = round(1000 * (t2 - self.t1))
@@ -568,16 +564,12 @@ class Graph:
 
             return max(euristici)
 
-
     def __repr__(self):
         """
         Metoda utilitara pentru debugging.
 
         :return: sir de afisat
         """
-        # testez timpul de timeout
-        self.depasire_timeout()
-
         sir = ""
         for (k, v) in self.__dict__.items():
             sir += "{} = {}\n".format(k, v)
@@ -708,7 +700,6 @@ def a_star_optimizat(gr, tip_euristica):
 
     # inchid fisierul de iesire
     gr.output.close()
-
 
 def citire_linie_de_comanda():
 
